@@ -67,6 +67,37 @@ describe('buildDGraphResolvers', () => {
       let result = await graphql(schema3, query, {}, {}, { a: 7 })
     }
   })
+  it('two query', async () => {
+    let schema = buildSchema(`
+    type Query {
+      hello:String!
+      hello2: String!
+    }
+    `)
+    let c = 0
+    const resolvers = buildDGraphResolvers(schema, () => {
+      c++
+      return {
+        data: {
+          hello: '7',
+          hello2: '7',
+        },
+      }
+    })
+    let schema2 = mergeSchemas({
+      schemas: [schema],
+      resolvers: resolvers,
+    })
+
+    const query = `
+    query {
+      hello
+      hello2
+    }
+    `
+    let result = await graphql(schema2, query, {}, {}, { a: 7 })
+    expect(c).toEqual(1)
+  })
   it('with directive', async () => {
     let schema = buildSchema(`
     directive @auth(r: String) on FIELD_DEFINITION
@@ -173,13 +204,10 @@ describe('buildDGraphResolvers', () => {
       }
       `
       let c = 0
-      data = (variables: any) => (
-        c++,
-        {
-          a: variables['word'],
-          b: variables['word'],
-        }
-      )
+      data = (variables: any) => ({
+        a: variables['word'],
+        b: variables['word'],
+      })
       let result = await graphql(schema2, query, {}, {}, { word: word })
       expect(result.errors || []).toEqual([])
       expect(result.data).toEqual({ a: word, b: word })
