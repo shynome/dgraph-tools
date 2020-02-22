@@ -203,7 +203,6 @@ describe('buildDGraphResolvers', () => {
         b: hello(word:$word)
       }
       `
-      let c = 0
       data = (variables: any) => ({
         a: variables['word'],
         b: variables['word'],
@@ -211,7 +210,6 @@ describe('buildDGraphResolvers', () => {
       let result = await graphql(schema2, query, {}, {}, { word: word })
       expect(result.errors || []).toEqual([])
       expect(result.data).toEqual({ a: word, b: word })
-      expect(c).toEqual(1)
     }
   })
 })
