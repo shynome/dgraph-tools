@@ -41,10 +41,10 @@ export class DGraphRmote {
       return val
     })
   }
-  static makeResolver = (
-    fetcher: Fetcher,
+  static makeResolver = <C = any>(
+    fetcher: Fetcher<C>,
     filterToSchema: FilterToSchema,
-    getStoreObject: (ctx: any) => Context = c => c,
+    getStoreObject: (ctx: any) => any = c => c,
   ): GraphQLFieldResolver<any, Context> => (...r) => {
     const store = getStoreObject(r[2])
     store[DGraphRmoteContextKey] =
@@ -57,7 +57,7 @@ export class DGraphRmote {
 export const buildDGraphResolvers = <C = any>(
   schema: GraphQLSchema,
   fetcher: Fetcher<C>,
-  getStoreObject: (ctx: any) => Context = c => c,
+  getStoreObject: (ctx: C) => any = c => c,
 ) => {
   let resolvers = {}
   const resolver = DGraphRmote.makeResolver(
