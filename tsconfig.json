@@ -3,7 +3,7 @@
     "target": "ES2015",
     "outDir": "dist",
     "moduleResolution": "Node",
-    "lib": ["ScriptHost", "ES2015"],
+    "lib": ["ScriptHost", "ESNext"],
     "declaration": true
   },
   "exclude": ["src/__tests__"],

@@ -12,7 +12,9 @@
     "prebuild": "rm -rf dist",
     "build": "tsc",
     "prepack": "npm run build",
-    "preversion": "npm run test"
+    "preversion": "npm run test",
+    "prepublish": "yarn test",
+    "postversion": "git push --follow-tags"
   },
   "repository": {
     "type": "git",
