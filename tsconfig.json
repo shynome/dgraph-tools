@@ -1,0 +1,11 @@
+{
+  "compilerOptions": {
+    "target": "ES2015",
+    "outDir": "dist",
+    "moduleResolution": "Node",
+    "lib": ["ScriptHost", "ES2015"],
+    "declaration": true
+  },
+  "exclude": ["src/__tests__"],
+  "include": ["src"]
+}
