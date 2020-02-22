@@ -2,6 +2,7 @@
   "compilerOptions": {
     "target": "ES2015",
     "outDir": "dist",
+    "module": "commonjs",
     "moduleResolution": "Node",
     "lib": ["ScriptHost", "ESNext"],
     "declaration": true
