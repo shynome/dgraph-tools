@@ -1,1 +1,4 @@
-export { buildDGraphResolvers } from './buildDGraphResolvers'
+export {
+  buildDGraphResolvers,
+  DGraphRmoteContextKey,
+} from './buildDGraphResolvers'

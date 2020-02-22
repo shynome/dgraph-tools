@@ -1,18 +1,18 @@
 import { GraphQLSchema, GraphQLFieldResolver } from 'graphql'
 import { FilterToSchema, Request } from 'graphql-tools'
 
-interface Fetcher<C = any, R = { data: any }> {
+export interface Fetcher<C = any, R = { data: any }> {
   (req: Request & { context: C }): R | Promise<R>
 }
-const DGraphRmoteContextKey = Symbol('dgraph')
+export const DGraphRmoteContextKey = Symbol('dgraph')
 
-interface Context {
+export interface Context {
   [DGraphRmoteContextKey]: DGraphRmote
 }
 
 type Resolvers = { [k: string]: GraphQLFieldResolver<any, any> }
 
-class DGraphRmote {
+export class DGraphRmote {
   constructor(public fetcher: Fetcher, public filterToSchema: FilterToSchema) {}
   request: Promise<{ data: any }>
   resolve: GraphQLFieldResolver<any, Context> = async (
