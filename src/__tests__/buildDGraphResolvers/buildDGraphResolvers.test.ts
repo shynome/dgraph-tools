@@ -12,7 +12,6 @@ import {
   SchemaDirectiveVisitor,
 } from 'graphql-tools'
 import { GraphQLModule } from '@graphql-modules/core'
-import './gql.module'
 
 describe('buildDGraphResolvers', () => {
   it('base', async () => {
