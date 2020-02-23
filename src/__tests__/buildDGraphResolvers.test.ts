@@ -11,6 +11,7 @@ import {
   buildSchemaFromTypeDefinitions,
   SchemaDirectiveVisitor,
 } from 'graphql-tools'
+import { GraphQLModule } from '@graphql-modules/core'
 
 describe('buildDGraphResolvers', () => {
   it('base', async () => {
@@ -211,5 +212,78 @@ describe('buildDGraphResolvers', () => {
       expect(result.errors || []).toEqual([])
       expect(result.data).toEqual({ a: word, b: word })
     }
+  })
+  it('graphql module with directive', async () => {
+    const a = buildSchemaFromTypeDefinitions(`
+    type User {
+      id: String!
+    }
+    `)
+    const b = buildSchemaFromTypeDefinitions(`
+    directive @auth(r: String) on FIELD_DEFINITION
+    type User {
+      id: String! @auth(r:"sss")
+    }
+    type Query {
+      u: User!
+    }
+    `)
+    class AuthDirective extends SchemaDirectiveVisitor {
+      public visitFieldDefinition(field: GraphQLField<any, any>) {
+        const { resolve = defaultFieldResolver } = field
+        field.resolve = async (...r) => {
+          let val = await resolve(...r)
+          val = val + '1'
+          return val
+        }
+        return field
+      }
+    }
+    const s = mergeSchemas({
+      schemas: [a, b],
+      mergeDirectives: true,
+    })
+    const m1 = new GraphQLModule({
+      typeDefs: [s],
+      resolvers: () => {
+        const r = buildDGraphResolvers(s, () => {
+          return {
+            data: {
+              u: { id: '7' },
+            },
+          }
+        })
+        return r
+      },
+      schemaDirectives: {
+        auth: AuthDirective,
+      },
+    })
+    const m2 = new GraphQLModule({
+      typeDefs: `
+      type Query {
+        hello: String!
+      }
+      `,
+      resolvers: {
+        Query: {
+          hello: () => 'hello',
+        },
+      },
+    })
+    const m = new GraphQLModule({
+      imports: [m1, m2],
+    })
+    SchemaDirectiveVisitor.visitSchemaDirectives(m.schema, m.schemaDirectives)
+    const q = `
+    query {
+      u {
+        id
+      }
+    }
+    `
+    const r = await graphql(m.schema, q, {}, {})
+    expect(r.errors || []).toEqual([])
+    expect(r.data.u.id).toEqual('71')
   })
 })
