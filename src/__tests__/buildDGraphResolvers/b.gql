@@ -1,0 +1,4 @@
+directive @auth(r: String) on FIELD_DEFINITION
+type User {
+  id: String! @auth(r: "sss")
+}

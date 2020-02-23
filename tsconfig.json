@@ -5,6 +5,7 @@
     "module": "commonjs",
     "moduleResolution": "Node",
     "lib": ["ScriptHost", "ESNext"],
+    "esModuleInterop": true,
     "declaration": true
   },
   "exclude": ["src/__tests__"],

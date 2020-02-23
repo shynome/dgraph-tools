@@ -1,4 +1,4 @@
-import { buildDGraphResolvers } from '../buildDGraphResolvers'
+import { buildDGraphResolvers } from '../../buildDGraphResolvers'
 import {
   buildSchema,
   graphql,
@@ -12,6 +12,7 @@ import {
   SchemaDirectiveVisitor,
 } from 'graphql-tools'
 import { GraphQLModule } from '@graphql-modules/core'
+import './gql.module'
 
 describe('buildDGraphResolvers', () => {
   it('base', async () => {
@@ -218,14 +219,14 @@ describe('buildDGraphResolvers', () => {
     type User {
       id: String!
     }
+    type Query {
+      u: User!
+    }
     `)
     const b = buildSchemaFromTypeDefinitions(`
     directive @auth(r: String) on FIELD_DEFINITION
     type User {
       id: String! @auth(r:"sss")
-    }
-    type Query {
-      u: User!
     }
     `)
     class AuthDirective extends SchemaDirectiveVisitor {
@@ -273,6 +274,52 @@ describe('buildDGraphResolvers', () => {
     })
     const m = new GraphQLModule({
       imports: [m1, m2],
+    })
+    SchemaDirectiveVisitor.visitSchemaDirectives(m.schema, m.schemaDirectives)
+    const q = `
+    query {
+      u {
+        id
+      }
+    }
+    `
+    const r = await graphql(m.schema, q, {}, {})
+    expect(r.errors || []).toEqual([])
+    expect(r.data.u.id).toEqual('71')
+  })
+  it('graphql module with directive and graphql-tag loader', async () => {
+    const a = buildSchemaFromTypeDefinitions((await import('./a.gql')) as any)
+    const b = buildSchemaFromTypeDefinitions((await import('./b.gql')) as any)
+    class AuthDirective extends SchemaDirectiveVisitor {
+      public visitFieldDefinition(field: GraphQLField<any, any>) {
+        const { resolve = defaultFieldResolver } = field
+        field.resolve = async (...r) => {
+          let val = await resolve(...r)
+          val = val + '1'
+          return val
+        }
+        return field
+      }
+    }
+    const s = mergeSchemas({
+      schemas: [a, b],
+      mergeDirectives: true,
+    })
+    const m = new GraphQLModule({
+      typeDefs: [s],
+      resolvers: () => {
+        const r = buildDGraphResolvers(s, () => {
+          return {
+            data: {
+              u: { id: '7' },
+            },
+          }
+        })
+        return r
+      },
+      schemaDirectives: {
+        auth: AuthDirective,
+      },
     })
     SchemaDirectiveVisitor.visitSchemaDirectives(m.schema, m.schemaDirectives)
     const q = `

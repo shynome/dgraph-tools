@@ -1,0 +1,6 @@
+type User {
+  id: String!
+}
+type Query {
+  u: User!
+}
